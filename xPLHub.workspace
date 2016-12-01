@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_workspace_file>
+	<Workspace title="xPLHub">
+		<Project filename="xPLHub.cbp" />
+		<Project filename="xPLHub - Tests.cbp" />
+	</Workspace>
+</CodeBlocks_workspace_file>
