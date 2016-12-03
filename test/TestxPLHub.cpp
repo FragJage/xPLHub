@@ -216,15 +216,18 @@ bool TestxPLHub::Stop()
     xPL::SchemaObject sch;
 
     xPLDev.ServicePause(true);
-    Plateforms::delay(800);
+    Plateforms::delay(700);
     xPLDev.ServicePause(false);
     xPLDev.ServiceStop();
 
-    msg = SimpleSockUDP::GetLastSend(10);     //Pass hbeat message
+    msg = SimpleSockUDP::GetLastSend(10);
     sch.Parse(msg);
     assert("hbeat"==sch.GetClass());
     assert("end"==sch.GetType());
-    Plateforms::delay(200);
+    Plateforms::delay(300);
+
+msg = SimpleSockUDP::GetLastSend(10);
+cout << "MSG1 " << msg << endl;
     return true;
 }
 
@@ -234,6 +237,10 @@ bool TestxPLHub::ReStart()
 
     thread integrationTest(ThreadStart, &xPLDev);
     integrationTest.detach();
+
+    Plateforms::delay(510);
+msg = SimpleSockUDP::GetLastSend(10);
+cout << "MSG2 " << msg << endl;
 
     return true;
 }
@@ -246,7 +253,7 @@ bool TestxPLHub::ReStop()
 
     xPLDev.ServiceStop();
 
-    msg = SimpleSockUDP::GetLastSend(20);
+    msg = SimpleSockUDP::GetLastSend(15);
     sch.Parse(msg);
     assert("hbeat"==sch.GetClass());
     assert("end"==sch.GetType());
