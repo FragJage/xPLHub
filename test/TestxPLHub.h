@@ -19,6 +19,8 @@ public:
     bool Start();
     bool StdConfig();
     bool HubFunction();
+    bool ReConfig();
+    bool ReLaunch();
     bool Stop();
     bool ReStart();
     bool ReStop();
