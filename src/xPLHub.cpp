@@ -65,7 +65,6 @@ bool xPLHub::MsgAnswer(xPL::SchemaObject& msg)
             if(((std::find(m_LocalAddressList.begin(), m_LocalAddressList.end(), ip) != m_LocalAddressList.end()))&&(port!=3865))
             {
                 if(m_HubClients[port].port==0) newClient = true;
-
                 m_HubClients[port].ipAddress = ip;
                 m_HubClients[port].port = port;
                 m_HubClients[port].interval = atoi(msg.GetValue("interval").c_str());
@@ -106,7 +105,7 @@ bool xPLHub::MsgAnswer(xPL::SchemaObject& msg)
         if(it->second.timeout < Time )
         {
             LOG_VERBOSE(m_Log) << "Timeout : removing client on port " << it->second.port;
-            startLaunch = ToRelaunch(it->second);
+            startLaunch |= ToRelaunch(it->second);
             it = m_HubClients.erase(it);
         }
         else
@@ -181,8 +180,12 @@ void xPLHub::Configure()
     while(itClient != m_HubClients.end())
     {
         if(listCommand.find((*itClient).second.command) == listCommand.end())
+        {
             Process::terminate((*itClient).second.pid);
-        ++itClient;
+            itClient = m_HubClients.erase(itClient);
+        }
+        else
+            ++itClient;
     }
 
     StartLaunch();
@@ -191,7 +194,6 @@ void xPLHub::Configure()
 bool xPLHub::ToRelaunch(const HubClient& client)
 {
     if(client.command=="") return false;
-
     Process::terminate(client.pid);
     m_ToLaunch.push_back(client.command);
     return true;
