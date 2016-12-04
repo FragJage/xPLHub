@@ -1,6 +1,6 @@
 [![Build Status](https://travis-ci.org/FragJage/xPLHub.svg?branch=master)](https://travis-ci.org/FragJage/xPLHub)
-[![Coverage Status](https://coveralls.io/repos/github/FragJage/xPLHub/badge.svg?branch=master&bust=1)](https://coveralls.io/github/FragJage/xPLHub?branch=master)
-[![Coverity Scan Build](https://scan.coverity.com/projects/99999/badge.svg)](https://scan.coverity.com/projects/99999)
+[![Coverage Status](https://coveralls.io/repos/github/FragJage/xPLHub/badge.svg?branch=master&bust=0)](https://coveralls.io/github/FragJage/xPLHub?branch=master)
+[![Coverity Scan Build](https://scan.coverity.com/projects/11058/badge.svg)](https://scan.coverity.com/projects/11058)
 xPLHub
 ===========
 Software hub for xPL protocol. 
