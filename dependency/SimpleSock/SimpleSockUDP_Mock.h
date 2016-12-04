@@ -123,6 +123,11 @@ class SimpleSockUDP
         };
         void Send(const string& buffer)
         {
+            if(SimpleSockUDP::g_ExceptionOnNextSend)
+            {
+                SimpleSockUDP::g_ExceptionOnNextSend = false;
+                throw logic_error("Mock exception");
+            }
             SetSend(buffer);
         };
         void Send(const char* buffer, size_t bufferSize)
@@ -209,6 +214,10 @@ class SimpleSockUDP
                 SimpleSockUDP::g_MockRecv += value;
             SimpleSockUDP::g_MockRecvMutex.unlock();
         };
+        static void ExceptionOnNextSend()
+        {
+            SimpleSockUDP::g_ExceptionOnNextSend = true;
+        };
 
     private:
         bool m_isOpen;
@@ -255,6 +264,7 @@ class SimpleSockUDP
         static mutex g_MockRecvMutex;
         static mutex g_MockSendMutex;
         static bool m_initSocket;
+        static bool g_ExceptionOnNextSend;
 };
 
 class SimpleSockUDP::Exception: public exception

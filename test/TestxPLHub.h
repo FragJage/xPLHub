@@ -21,8 +21,11 @@ public:
     bool HubFunction();
     bool ReConfig();
     bool ReLaunch();
+    bool ClientEnd();
+    bool ResetClient();
     bool Stop();
     bool ReStart();
+    bool ResetLaunch();
     bool ReStop();
 
     xPLHub xPLDev;

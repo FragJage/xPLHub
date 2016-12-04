@@ -185,6 +185,7 @@ bool SimpleSockUDP::GetInterfaceInfo(const string& interfaceAddress, unsigned in
 #endif
 #else
 bool SimpleSockUDP::m_initSocket = false;
+bool SimpleSockUDP::g_ExceptionOnNextSend = false;
 string SimpleSockUDP::g_MockRecv = "";
 queue<string> SimpleSockUDP::g_MockSend;
 mutex SimpleSockUDP::g_MockRecvMutex;

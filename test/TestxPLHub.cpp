@@ -11,8 +11,11 @@ TestxPLHub::TestxPLHub() : TestClass("Hub", this)
 	addTest("HubFunction", &TestxPLHub::HubFunction);
 	addTest("ReConfig", &TestxPLHub::ReConfig);
 	addTest("ReLaunch", &TestxPLHub::ReLaunch);
+	addTest("ClientEnd", &TestxPLHub::ClientEnd);
+	addTest("ResetClient", &TestxPLHub::ResetClient);
 	addTest("Stop", &TestxPLHub::Stop);
 	addTest("ReStart", &TestxPLHub::ReStart);
+	addTest("ResetLaunch", &TestxPLHub::ResetLaunch);
 	addTest("ReStop", &TestxPLHub::ReStop);
 
     if(remove("config")==0)
@@ -210,6 +213,66 @@ bool TestxPLHub::ReLaunch()
     return true;
 }
 
+bool TestxPLHub::ClientEnd()        //Increase code coverage
+{
+    string msg;
+    xPL::SchemaObject schHb(xPL::SchemaObject::trig, "hbeat", "app");
+    SimpleSockUDP socket;
+
+    schHb.SetValue("remote-ip", socket.GetAddress());
+    schHb.SetValue("interval", "10");
+    schHb.SetValue("port", "3871");
+    msg = schHb.ToMessage("fragxpl-end.default", "fragxpl-hub.default");
+    SimpleSockUDP::SetNextRecv(msg);
+
+    do
+    {
+        msg = SimpleSockUDP::GetLastSend(10);
+    } while(msg!="");
+    Plateforms::delay(500);
+
+    msg = schHb.ToMessage("fragxpl-end.default", "fragxpl-hub.default");
+    SimpleSockUDP::SetNextRecv(msg);
+
+    do
+    {
+        msg = SimpleSockUDP::GetLastSend(10);
+    } while(msg!="");
+    Plateforms::delay(500);
+
+    schHb.SetType("end");
+    msg = schHb.ToMessage("fragxpl-end.default", "fragxpl-hub.default");
+    SimpleSockUDP::SetNextRecv(msg);
+
+    do
+    {
+        msg = SimpleSockUDP::GetLastSend(10);
+    } while(msg!="");
+    Plateforms::delay(500);
+
+    return true;
+}
+
+bool TestxPLHub::ResetClient()        //Increase code coverage
+{
+    string msg;
+    xPL::SchemaObject schSensor(xPL::ISchema::trig, "sensor", "basic");
+
+    schSensor.SetValue("type", "temp");
+    schSensor.SetValue("device", "room");
+    schSensor.SetValue("current", "19");
+    msg = schSensor.ToMessage("fragxpl-onewire.test", "*");
+    SimpleSockUDP::ExceptionOnNextSend();
+    SimpleSockUDP::SetNextRecv(msg);
+
+    do
+    {
+        msg = SimpleSockUDP::GetLastSend(10);
+    } while(msg!="");
+
+    return true;
+}
+
 bool TestxPLHub::Stop()
 {
     string msg;
@@ -226,8 +289,8 @@ bool TestxPLHub::Stop()
     assert("end"==sch.GetType());
     Plateforms::delay(300);
 
-msg = SimpleSockUDP::GetLastSend(10);
-cout << "MSG1 " << msg << endl;
+    msg = SimpleSockUDP::GetLastSend(5);
+    assert("" == msg);
     return true;
 }
 
@@ -239,8 +302,18 @@ bool TestxPLHub::ReStart()
     integrationTest.detach();
 
     Plateforms::delay(510);
-msg = SimpleSockUDP::GetLastSend(10);
-cout << "MSG2 " << msg << endl;
+    msg = SimpleSockUDP::GetLastSend(5);
+    assert("" == msg);
+
+    return true;
+}
+
+bool TestxPLHub::ResetLaunch()
+{
+    Plateforms::delay(510);
+    assert(true == Process::find("ModuleOne"));
+    Plateforms::delay(9500);
+    assert(true == Process::find("ModuleThree"));
 
     return true;
 }
