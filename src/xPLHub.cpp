@@ -11,6 +11,8 @@ using namespace std;
 xPLHub::xPLHub()
 {
     m_LaunchMode = false;
+    m_LaunchPID = 0;
+    m_LaunchTimeout = time(nullptr);
     m_Log = m_xPLDevice.GetLogHandle();
 
     m_xPLDevice.Initialisation("fragxpl", "hub", "default");
