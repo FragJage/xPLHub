@@ -277,7 +277,7 @@ void xPLHub::FindLocalAddress()
 int xPLHub::ServiceStart(int argc, char* argv[])
 {
     m_bServiceStop = false;
-    if(argc > 1) m_xPLDevice.SetConfigFileName(argv[1]);
+    if(argc > 2) m_xPLDevice.SetConfigFileName(argv[2]);
 
     m_xPLDevice.Open();
     if(m_xPLDevice.GetTCPPort() != 3865)
