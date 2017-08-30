@@ -25,17 +25,12 @@
 #include <queue>
 #include <string>
 #include <mutex>
-#ifdef WIN32
-    #include "Thread/mingw.mutex.h"
-#else
-    #include <thread>
-    #include <netdb.h>      //Pour gethostbyname
-#endif
 #include "Plateforms/Plateforms.h"
 
 using namespace std;
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
+
 
 class SimpleSockUDP
 {
@@ -76,6 +71,9 @@ class SimpleSockUDP
         };
         void Open(int port, unsigned long ipAddress)
         {
+            if((g_PortInUse!=-1)&&(g_PortInUse==port))
+                throw  SimpleSock::Exception(0x0025, "SimpleSockUDP_Mock::Listen: bind error");
+
             memset(&m_sockAddress, 0, sizeof(m_sockAddress));
             m_sockAddress.sin_family = AF_INET;
             m_sockAddress.sin_port=htons(port);
@@ -166,19 +164,12 @@ class SimpleSockUDP
         };
         string GetAddress()
         {
-            char hostName[128];
-            struct hostent* pHostEnt;
-            struct in_addr** addressList;
+            return "127.0.0.1";
+        };
 
-
-            if(gethostname(hostName, 127) != 0) return "127.0.0.1";
-            pHostEnt=gethostbyname(hostName);
-            if(pHostEnt == nullptr) return "127.0.0.1";
-
-            addressList = (struct in_addr **)pHostEnt->h_addr_list;
-            if(addressList[0] == nullptr)  return "127.0.0.1";
-
-            return inet_ntoa(*addressList[0]);
+        static void SetPortInUse(int port)
+        {
+            g_PortInUse = port;
         };
 
         static string GetLastSend(int delay)
@@ -198,7 +189,6 @@ class SimpleSockUDP
                 if(tmp!="") break;
                 Plateforms::delay(100);
             }
-
             return tmp;
         };
         static void SetNextRecv(string value)
@@ -265,36 +255,35 @@ class SimpleSockUDP
         static mutex g_MockSendMutex;
         static bool m_initSocket;
         static bool g_ExceptionOnNextSend;
+        static int g_PortInUse;
 };
 
-class SimpleSockUDP::Exception: public exception
+class SimpleSockUDP::Exception: public std::exception
 {
-    public:
-        Exception(int number, string const& message) throw()
-        {
-            m_number = number;
-            m_message = message;
-            m_system = 0;
-            SetWhatMsg();
-        };
-        Exception(int number, string const& message, int system) throw()
-        {
-            m_number = number;
-            m_message = message;
-            m_system = system;
-            SetWhatMsg();
-        };
-        ~Exception() throw()
-        {
-        };
-        const char* what() const throw()
-        {
-            return m_whatMsg.c_str();
-        };
-        int GetNumber() const throw()
-        {
-            return m_number;
-        };
+public:
+    Exception(int number, std::string const& message) throw() : m_number(number), m_message(message), m_system(0), m_whatMsg()
+    {
+        SetWhatMsg();
+    };
+
+    Exception(int number, std::string const& message, int system) throw() : m_number(number), m_message(message), m_system(system), m_whatMsg()
+    {
+        SetWhatMsg();
+    };
+
+    ~Exception() throw()
+    {
+    };
+
+    const char* what() const throw()
+    {
+      return m_whatMsg.c_str();
+    };
+
+    int GetNumber() const throw()
+    {
+      return m_number;
+    };
 
     private:
         void SetWhatMsg()
@@ -307,9 +296,9 @@ class SimpleSockUDP::Exception: public exception
         };
 
         int m_number;
-        string m_message;
+        std::string m_message;
         int m_system;
-        string m_whatMsg;
+        std::string m_whatMsg;
 };
 
 #pragma GCC diagnostic pop

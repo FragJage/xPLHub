@@ -1,6 +1,7 @@
 #include "StringTools.h"
 #include <algorithm>
 #include <functional>
+#include <sstream>
 
 using namespace std;
 
@@ -36,6 +37,18 @@ bool StringTools::Split(string const& source, char const delimiter, string* key,
     *value = StringTools::ltrim(*value);
 
     return true;
+}
+
+vector<string> StringTools::Split(const string &s, char delim)
+{
+    stringstream ss(s);
+    string item;
+    vector<string> tokens;
+
+    while (getline(ss, item, delim))
+        tokens.push_back(trim(item));
+
+    return tokens;
 }
 
 void StringTools::ParasitCar(string& str)
@@ -88,4 +101,19 @@ bool StringTools::IsNumber(const std::string& s)
     std::string::const_iterator it = s.begin();
     while ( (it != s.end()) && (isdigit(*it)||(*it=='.')||(*it=='-')||(*it=='+')) ) ++it;
     return !s.empty() && it == s.end();
+}
+
+string StringTools::to_string(int n)
+{
+    ostringstream oss;
+    oss << n;
+    return oss.str();
+}
+
+int StringTools::stoi(const string& s)
+{
+    istringstream iss(s);
+    int n;
+    iss >> n;
+    return n;
 }

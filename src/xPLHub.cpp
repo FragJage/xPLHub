@@ -11,7 +11,6 @@ using namespace std;
 xPLHub::xPLHub()
 {
     m_LaunchMode = false;
-    m_LaunchPID = 0;
     m_LaunchTimeout = time(nullptr);
     m_Log = m_xPLDevice.GetLogHandle();
 
@@ -50,11 +49,9 @@ bool xPLHub::MsgAnswer(xPL::SchemaObject& msg)
     bool toRemove;
     bool startLaunch = false;
 
-
     //Update hubClient list for class hbeat/config and type app/end message to local address
     msgClass = msg.GetClass();
     msgType = msg.GetType();
-
 
     if((msgClass == "hbeat")||(msgClass == "config"))
     {
@@ -255,10 +252,11 @@ void xPLHub::FindLocalAddress()
 	char hostName[128];
     struct hostent* pHostEnt;
     struct in_addr** addressList;
+    SimpleSockUDP socket;
 
 
     m_LocalAddressList.clear();
-    m_LocalAddressList.push_back(INADDR_LOOPBACK);
+    m_LocalAddressList.push_back(inet_addr(socket.GetAddress().c_str()));
 	if(gethostname(hostName, 127) != 0) return;
 
 	pHostEnt=gethostbyname(hostName);

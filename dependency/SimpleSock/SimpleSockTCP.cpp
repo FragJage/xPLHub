@@ -59,3 +59,8 @@ void SimpleSockTCP::Listen(int port)
 {
     SimpleSock::Listen(port, INADDR_ANY);
 }
+
+void SimpleSockTCP::Listen(int port, const string& ipAddress)
+{
+    SimpleSock::Listen(port, ipAddress);
+}

@@ -100,7 +100,7 @@ bool BasicConfig::MsgAnswer(SchemaObject& msg)
         LOG_VERBOSE(m_Log) << "send config.current message";
         SchemaConfigCurrent configCurrent;
         configCurrent = ToConfigCurrent();
-        m_xPLDevice->SendMessage(&configCurrent, msg.GetSource());
+        m_xPLDevice->SendxPLMessage(&configCurrent, msg.GetSource());
         LOG_EXIT_OK;
         return true;
     }
@@ -117,7 +117,7 @@ bool BasicConfig::MsgAnswer(SchemaObject& msg)
         LOG_VERBOSE(m_Log) << "send config.list message";
         SchemaConfigList configList;
         configList = ToConfigList();
-        m_xPLDevice->SendMessage(&configList, msg.GetSource());
+        m_xPLDevice->SendxPLMessage(&configList, msg.GetSource());
         LOG_EXIT_OK;
         return true;
     }
@@ -161,7 +161,6 @@ void BasicConfig::LoadConfig(SimpleIni& iniFile)
     ostringstream name;
     string value;
     vector<ConfigItem*>::const_iterator itConfig;
-
 
     for(itConfig=m_ConfigItems.begin(); itConfig!=m_ConfigItems.end();++itConfig)
     {

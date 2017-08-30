@@ -48,6 +48,7 @@ class SimpleSockTCP : public SimpleSock
         /// \param    port          Port number.
         /// \details  Listen for incoming connections on the port "port".
         void Listen(int port);
+        void Listen(int port, const std::string& ipAddress);
 
         #ifdef SIMPLESOCKTCP_MOCK
         static std::string GetLastSend(int delay);

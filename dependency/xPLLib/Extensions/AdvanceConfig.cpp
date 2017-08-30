@@ -81,7 +81,7 @@ bool AdvanceConfig::MsgAnswer(SchemaObject& msg)
         LOG_VERBOSE(m_Log) << "send advanceconfig.list message";
         SchemaAdvanceConfigList advanceConfigList;
         advanceConfigList = ToFormatMessage();
-        m_xPLDevice->SendMessage(&advanceConfigList, msg.GetSource());
+        m_xPLDevice->SendxPLMessage(&advanceConfigList, msg.GetSource());
         LOG_EXIT_OK;
         return true;
     }
@@ -134,7 +134,7 @@ bool AdvanceConfig::MsgAnswer(SchemaObject& msg)
             for(i=0; i<nb; i++)
             {
                 advanceConfigCurrent = ToConfigMessage(i);
-                m_xPLDevice->SendMessage(&advanceConfigCurrent, msg.GetSource());
+                m_xPLDevice->SendxPLMessage(&advanceConfigCurrent, msg.GetSource());
             }
 
             LOG_EXIT_OK;
@@ -150,7 +150,7 @@ bool AdvanceConfig::MsgAnswer(SchemaObject& msg)
         }
 
         LOG_VERBOSE(m_Log) << "send advanceConfigCurrent stat message";
-        m_xPLDevice->SendMessage(&advanceConfigCurrent, msg.GetSource());
+        m_xPLDevice->SendxPLMessage(&advanceConfigCurrent, msg.GetSource());
         LOG_EXIT_OK;
         return true;
     }
@@ -196,7 +196,6 @@ void AdvanceConfig::LoadConfig(SimpleIni& iniFile)
     SimpleIni::SectionIterator sectIt;
     SimpleIni::KeyIterator keyIt;
     map<string, string> keyValuePair;
-
 
     for(sectIt=iniFile.beginSection(); sectIt!=iniFile.endSection(); ++sectIt)
     {
@@ -276,7 +275,7 @@ map<string, string>* AdvanceConfig::GetConfig(const string& name)
 bool AdvanceConfig::DelConfig(unsigned int nb)
 {
     if(nb>=m_DeviceValues.size()) return false;
-    m_DeviceValues.erase(m_DeviceValues.begin() + nb - 1);
+    m_DeviceValues.erase(m_DeviceValues.begin() + nb);
     return true;
 }
 

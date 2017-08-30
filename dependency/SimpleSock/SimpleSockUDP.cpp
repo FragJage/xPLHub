@@ -51,6 +51,11 @@ void SimpleSockUDP::Open(int port, unsigned long ipAddress)
     SimpleSock::Open(port, ipAddress);
 }
 
+void SimpleSockUDP::Open(int port, const std::string& ipAddress)
+{
+    SimpleSock::Open(port, ipAddress);
+}
+
 void SimpleSockUDP::Listen(int port)
 {
     SimpleSock::Listen(port, BroadcastAddress(m_networkInterface));
@@ -59,6 +64,11 @@ void SimpleSockUDP::Listen(int port)
 void SimpleSockUDP::Listen(int port, int address)
 {
     SimpleSock::Listen(port, address);
+}
+
+void SimpleSockUDP::Listen(int port, const std::string& ipAddress)
+{
+    SimpleSock::Listen(port, ipAddress);
 }
 
 string SimpleSockUDP::LocalAddress(const string& interfaceName="")
@@ -190,4 +200,5 @@ string SimpleSockUDP::g_MockRecv = "";
 queue<string> SimpleSockUDP::g_MockSend;
 mutex SimpleSockUDP::g_MockRecvMutex;
 mutex SimpleSockUDP::g_MockSendMutex;
+int SimpleSockUDP::g_PortInUse = -1;
 #endif

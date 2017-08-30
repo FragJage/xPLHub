@@ -160,6 +160,11 @@ void xPLDevCfg::AddBasicConfig(const string& name, ConfigItem::ConfigItemType ty
     m_BasicConfig.AddBasicConfig(name, type, nb);
 }
 
+int xPLDevCfg::RemoveBasicConfig(const string& name)
+{
+    return m_BasicConfig.RemoveConfigItem(name);
+}
+
 ConfigItem* xPLDevCfg::GetConfigItem(const string& name)
 {
     return m_BasicConfig.GetConfigItem(name);

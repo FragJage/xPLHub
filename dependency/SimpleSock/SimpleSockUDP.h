@@ -52,6 +52,7 @@ class SimpleSockUDP : public SimpleSock
         /// \param    ipAddress     IP Address of the host.
         /// \details  Open a connexion to the IP Address "ipAddress" on the port "port".
         void Open(int port, unsigned long ipAddress);
+        void Open(int port, const std::string& ipAddress);
 
         /// \brief    Listen for incoming connections
         /// \param    port          Port number.
@@ -63,6 +64,7 @@ class SimpleSockUDP : public SimpleSock
         /// \param    address     IP Address of the host.
         /// \details  Listen for incoming connections IP Address "ipAddress" on the port "port".
         void Listen(int port, int address);
+        void Listen(int port, const std::string& ipAddress);
 
         /// \brief    Calculates the broadcast address
         /// \param    interfaceName     Interface name (eth0 generaly for linux, IP Address for Windows)

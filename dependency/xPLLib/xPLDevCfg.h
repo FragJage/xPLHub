@@ -46,6 +46,7 @@ class xPLDevCfg : public xPLDevice, public BasicConfig::IConfigure
 
         void AddBasicConfig(const std::string& name, ConfigItem::ConfigItemType type, const std::string& value);
         void AddBasicConfig(const std::string& name, ConfigItem::ConfigItemType type, int nb);
+        int RemoveBasicConfig(const std::string& name);
         ConfigItem* GetConfigItem(const std::string& name);
         void SetCallBackConfig(BasicConfig::IConfigure* callBackConfig);
 

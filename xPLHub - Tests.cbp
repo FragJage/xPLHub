@@ -41,14 +41,18 @@
 			</Target>
 		</Build>
 		<Compiler>
-			<Add option="-std=c++11" />
 			<Add option="-Wall" />
+			<Add option="-std=c++11" />
+			<Add option="-m32" />
 			<Add option="-fexceptions" />
 			<Add option="-DWIN32" />
 			<Add directory="src" />
 			<Add directory="test" />
 			<Add directory="dependency" />
 		</Compiler>
+		<Linker>
+			<Add option="-m32" />
+		</Linker>
 		<Unit filename="dependency/Plateforms/Plateforms.cpp" />
 		<Unit filename="dependency/Plateforms/Plateforms.h" />
 		<Unit filename="dependency/SafeFunctions/SafeFunctions.cpp" />

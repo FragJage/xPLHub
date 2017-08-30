@@ -140,7 +140,7 @@ SimpleLog::Line::~Line()
 SimpleLog::DefaultFilter::DefaultFilter()
 {
     #ifdef DEBUG
-	m_level = SimpleLog::LVL_INFO;
+	m_level = SimpleLog::LVL_DEBUG;
 	#else
 	m_level = SimpleLog::LVL_ERROR;
 	#endif

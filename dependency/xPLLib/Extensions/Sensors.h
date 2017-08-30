@@ -44,10 +44,23 @@ class Sensors : public xPLDevice::IExtension
         bool ModifyMessage(std::string device, std::string value, std::string type="");
 
     private:
+        class SensorSchema;
         SimpleLog* m_Log;
         xPLDevice* m_xPLDevice;
-        std::vector<SchemaObject*> m_Messages;
+        std::vector<SensorSchema> m_Messages;
 
+};
+
+class Sensors::SensorSchema
+{
+    public:
+        SensorSchema(SchemaObject* pMessage, bool neededDelete)
+        {
+            Message = pMessage;
+            NeededDelete = neededDelete;
+        };
+        SchemaObject* Message;
+        bool NeededDelete;
 };
 
 }

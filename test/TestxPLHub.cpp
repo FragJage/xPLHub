@@ -31,12 +31,14 @@ TestxPLHub::~TestxPLHub()
 void TestxPLHub::ThreadStart(xPLHub* pxPLDev)
 {
     char exeName[] = "test";
+    char modeName[] = "-console";
     char confName[] = "config";
-    char* argv[2];
+    char* argv[3];
 
     argv[0]= exeName;
-    argv[1]= confName;
-    pxPLDev->ServiceStart(2, argv);
+    argv[1]= modeName;
+    argv[2]= confName;
+    pxPLDev->ServiceStart(3, argv);
 }
 
 bool TestxPLHub::Start()
@@ -70,8 +72,9 @@ bool TestxPLHub::StdConfig()
     msg = schCfg.ToMessage("fragxpl-test.default", "fragxpl-hub.default");
     SimpleSockUDP::SetNextRecv(msg);
 
-    msg = SimpleSockUDP::GetLastSend(10);     //Pass Hbeat message
+    msg = SimpleSockUDP::GetLastSend(10);     //Pass Hbeat.End message
     msg = SimpleSockUDP::GetLastSend(10);
+
     sch.Parse(msg);
     assert("25"==sch.GetValue("interval"));
     assert("fragxpl-hub.test"==sch.GetSource());
@@ -82,17 +85,16 @@ bool TestxPLHub::StdConfig()
     schHb.SetValue("remote-ip", socket.GetAddress());
     schHb.SetValue("interval", "10");
     schHb.SetValue("port", "3866");
-    msg = schHb.ToMessage("fragxpl-one.default", "fragxpl-hub.default");
+    msg = schHb.ToMessage("fragxpl-one.default", "fragxpl-hub.test");
     SimpleSockUDP::SetNextRecv(msg);
 
     msg = SimpleSockUDP::GetLastSend(10);       //Pass hub forward 3866
-
     assert(true == Process::find("ModuleTwo"));
 
     schHb.SetValue("remote-ip", socket.GetAddress());
     schHb.SetValue("interval", "10");
     schHb.SetValue("port", "3867");
-    msg = schHb.ToMessage("fragxpl-two.default", "fragxpl-hub.default");
+    msg = schHb.ToMessage("fragxpl-two.default", "fragxpl-hub.test");
     SimpleSockUDP::SetNextRecv(msg);
 
     msg = SimpleSockUDP::GetLastSend(10);       //Pass hub forward 3866
@@ -297,11 +299,17 @@ bool TestxPLHub::Stop()
 bool TestxPLHub::ReStart()
 {
     string msg;
+    xPL::SchemaObject sch;
 
     thread integrationTest(ThreadStart, &xPLDev);
     integrationTest.detach();
 
     Plateforms::delay(510);
+    msg = SimpleSockUDP::GetLastSend(5);
+    sch.Parse(msg);
+    assert("25"==sch.GetValue("interval"));
+    assert("fragxpl-hub.test"==sch.GetSource());
+
     msg = SimpleSockUDP::GetLastSend(5);
     assert("" == msg);
 

@@ -1,4 +1,3 @@
-#include<iostream>
 /*** LICENCE ***************************************************************************************/
 /*
   xPPLib - Simple class to manage socket communication TCP or UDP
@@ -40,17 +39,16 @@ Sensors::Sensors(xPLDevice* xPLDev)
 
 Sensors::~Sensors()
 {
-	vector<SchemaObject*>::iterator itMsg;
+	vector<SensorSchema>::iterator itSensor;
 
-	for(itMsg=m_Messages.begin(); itMsg!=m_Messages.end(); ++itMsg)
+	for(itSensor=m_Messages.begin(); itSensor!=m_Messages.end(); ++itSensor)
 	{
-		delete *itMsg;
+	    if(itSensor->NeededDelete) delete itSensor->Message;
 	}
 }
 
 bool Sensors::MsgAnswer(SchemaObject& msg)
 {
-//cout << "MsgAnswer1" << endl;
     if(msg.GetMsgType() != SchemaObject::cmnd)
     {
         LOG_VERBOSE(m_Log) << "Not a command message.";
@@ -58,7 +56,6 @@ bool Sensors::MsgAnswer(SchemaObject& msg)
         return false;
     }
 
-//cout << "MsgAnswer2" << endl;
     if(msg.GetClass() != "sensor")
     {
         LOG_VERBOSE(m_Log) << "Not a sensor class.";
@@ -66,7 +63,6 @@ bool Sensors::MsgAnswer(SchemaObject& msg)
         return false;
     }
 
-//cout << "MsgAnswer3" << endl;
     if(msg.GetType() != "request")
     {
         LOG_VERBOSE(m_Log) << "Not a request type";
@@ -74,7 +70,6 @@ bool Sensors::MsgAnswer(SchemaObject& msg)
         return false;
     }
 
-//cout << "MsgAnswer4" << endl;
     if(msg.GetValue("request") != "current")
     {
         LOG_VERBOSE(m_Log) << "Not a request of current";
@@ -82,20 +77,19 @@ bool Sensors::MsgAnswer(SchemaObject& msg)
         return false;
     }
 
-//cout << "MsgAnswer5" << endl;
     SchemaObject* pMessage;
     string deviceName;
 
     deviceName = msg.GetValue("device");
     if(deviceName=="")
     {
-        vector<SchemaObject*>::iterator itMsg;
+        vector<SensorSchema>::iterator itSensor;
         LOG_VERBOSE(m_Log) << "no device so return all devices";
 
-        for(itMsg=m_Messages.begin(); itMsg!=m_Messages.end(); ++itMsg)
+        for(itSensor=m_Messages.begin(); itSensor!=m_Messages.end(); ++itSensor)
         {
-            (*itMsg)->SetMsgType(ISchema::stat);
-            m_xPLDevice->SendMessage(*itMsg, msg.GetSource());
+            (itSensor->Message)->SetMsgType(ISchema::stat);
+            m_xPLDevice->SendxPLMessage(itSensor->Message, msg.GetSource());
         }
 
         LOG_EXIT_OK;
@@ -112,7 +106,7 @@ bool Sensors::MsgAnswer(SchemaObject& msg)
 
     LOG_VERBOSE(m_Log) << "send sensor stat message";
     pMessage->SetMsgType(ISchema::stat);
-    m_xPLDevice->SendMessage(pMessage, msg.GetSource());
+    m_xPLDevice->SendxPLMessage(pMessage, msg.GetSource());
     LOG_EXIT_OK;
     return true;
 }
@@ -125,10 +119,10 @@ void Sensors::AddMessage(SchemaObject* pMessage)
 
     deviceName = pMessage->GetValue("device");
 	if(GetMessage(deviceName)!=nullptr) RemoveMessage(deviceName);
-    m_Messages.push_back(pMessage);
+    m_Messages.emplace_back(pMessage, false);
 
     pMessage->SetMsgType(ISchema::trig);
-    m_xPLDevice->SendMessage(pMessage, "*");
+    m_xPLDevice->SendxPLMessage(pMessage, "*");
 
     LOG_EXIT_OK;
 }
@@ -140,28 +134,28 @@ void Sensors::AddSensorMessage(string device, SchemaSensorTypeUtility::SensorTyp
 	LOG_ENTER;
 
 	if(GetMessage(device)!=nullptr) RemoveMessage(device);
-    m_Messages.push_back(sensorMsg);
+    m_Messages.emplace_back(sensorMsg, true);
 
     sensorMsg->SetMsgType(ISchema::trig);
-    m_xPLDevice->SendMessage(sensorMsg, "*");
+    m_xPLDevice->SendxPLMessage(sensorMsg, "*");
 
     LOG_EXIT_OK;
 }
 
 SchemaObject* Sensors::GetMessage(string device)
 {
-	vector<SchemaObject*>::iterator itMsg;
+	vector<SensorSchema>::iterator itSensor;
 
 	LOG_ENTER;
 	LOG_VERBOSE(m_Log) << "Search " << device << " message";
 
-	for(itMsg=m_Messages.begin(); itMsg!=m_Messages.end(); ++itMsg)
+	for(itSensor=m_Messages.begin(); itSensor!=m_Messages.end(); ++itSensor)
 	{
-		if((*itMsg)->GetValue("device") == device)
+		if((itSensor->Message)->GetValue("device") == device)
 		{
             LOG_VERBOSE(m_Log) << "Message found";
 		    LOG_EXIT_OK;
-			return *itMsg;
+			return itSensor->Message;
 		}
 	}
 
@@ -174,11 +168,11 @@ void Sensors::RemoveAllMessages()
 {
 	LOG_ENTER;
 
-	vector<SchemaObject*>::iterator itMsg;
+	vector<SensorSchema>::iterator itSensor;
 
-	for(itMsg=m_Messages.begin(); itMsg!=m_Messages.end(); ++itMsg)
+	for(itSensor=m_Messages.begin(); itSensor!=m_Messages.end(); ++itSensor)
 	{
-		delete *itMsg;
+		if(itSensor->NeededDelete) delete itSensor->Message;
 	}
 
     m_Messages.clear();
@@ -188,16 +182,16 @@ void Sensors::RemoveAllMessages()
 
 bool Sensors::RemoveMessage(string device)
 {
-	vector<SchemaObject*>::iterator itMsg;
+	vector<SensorSchema>::iterator itSensor;
 
 	LOG_ENTER;
 
-	for(itMsg=m_Messages.begin(); itMsg!=m_Messages.end(); ++itMsg)
+	for(itSensor=m_Messages.begin(); itSensor!=m_Messages.end(); ++itSensor)
 	{
-		if((*itMsg)->GetValue("device") == device)
+		if((itSensor->Message)->GetValue("device") == device)
 		{
-			delete *itMsg;
-			m_Messages.erase(itMsg);
+			if(itSensor->NeededDelete) delete itSensor->Message;
+			m_Messages.erase(itSensor);
 		    LOG_EXIT_OK;
 			return true;
 		}
@@ -220,7 +214,7 @@ bool Sensors::ModifyMessage(string device, string value, string type)
     if(type!="") pMessage->SetValue("type", type);  //Utilisé dans xPLFictif::ConfigChange
 
     pMessage->SetMsgType(ISchema::trig);
-    m_xPLDevice->SendMessage(pMessage, "*");
+    m_xPLDevice->SendxPLMessage(pMessage, "*");
 
     LOG_EXIT_OK;
     return true;

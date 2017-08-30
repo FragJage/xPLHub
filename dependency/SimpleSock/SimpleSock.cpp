@@ -77,7 +77,7 @@ void SimpleSock::Open(int port, unsigned long ipAddress)
     if(m_sockHandle == INVALID_SOCKET)
     {
         m_sockHandle = (int)socket(AF_INET, m_sockType, 0);
-        if(m_sockHandle==0) throw  SimpleSock::Exception(0x0001, "SimpleSock::Open: unable to create the socket", GetSocketError());
+        if(m_sockHandle==0) throw SimpleSock::Exception(0x0001, "SimpleSock::Open: unable to create the socket", GetSocketError());
     }
 
     memset(&m_sockAddress, 0, sizeof(m_sockAddress));
@@ -85,6 +85,13 @@ void SimpleSock::Open(int port, unsigned long ipAddress)
 	m_sockAddress.sin_port=htons(port);
     m_sockAddress.sin_addr.s_addr=ipAddress;
     m_isOpen = true;
+
+    if(m_sockType==SOCK_DGRAM)
+    {
+        int arg = 1;
+        if(setsockopt(m_sockHandle, SOL_SOCKET, SO_BROADCAST, (char*)&arg, sizeof(int))!=0)
+            throw SimpleSock::Exception(0x0002, "SimpleSock::Open: setsockopt(SO_BROADCAST) error", GetSocketError());
+    }
 }
 
 void SimpleSock::Open(int port, const string& ipAddress)
@@ -119,24 +126,13 @@ void SimpleSock::Listen(int port, const string& ipAddress)
 
 void SimpleSock::Listen(int port, unsigned long ipAddress)
 {
-    int arg = 1;
-
     Open(port, ipAddress);
 
-    switch(m_sockType)
+    if(m_sockType==SOCK_STREAM)
     {
-        case SOCK_DGRAM :
-            if(setsockopt(m_sockHandle, SOL_SOCKET, SO_BROADCAST, (char*)&arg, sizeof(int))!=0)
-                throw SimpleSock::Exception(0x0021, "SimpleSock::Listen: setsockopt(SO_BROADCAST) error", GetSocketError());
-            break;
-
-        case SOCK_STREAM :
-            if(setsockopt(m_sockHandle, SOL_SOCKET, SO_REUSEADDR, (char*)&arg, sizeof(int))!=0)
-                throw SimpleSock::Exception(0x0022, "SimpleSock::Listen: setsockopt(SO_REUSEADDR) error", GetSocketError());
-            break;
-
-        default :
-            throw SimpleSock::Exception(0x0024, "SimpleSock::Listen: unknown socket type");
+        int arg = 1;
+        if(setsockopt(m_sockHandle, SOL_SOCKET, SO_REUSEADDR, (char*)&arg, sizeof(int))!=0)
+            throw SimpleSock::Exception(0x0022, "SimpleSock::Listen: setsockopt(SO_REUSEADDR) error", GetSocketError());
     }
 
    	if(bind(m_sockHandle, (struct sockaddr*) &m_sockAddress, sizeof(m_sockAddress))!=0)
